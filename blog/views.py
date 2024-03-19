@@ -7,7 +7,10 @@ from blog.models import Blogpost
 
 
 def index(request):
-    return render(request, 'blog/index.html')
+    # we are storing oll objects of the blogpost in a variable name myposts
+    myposts = Blogpost.objects.all()
+    print(myposts)
+    return render(request, 'blog/index.html', {'myposts': myposts})
 
 
 def blogpost(request, id):
