@@ -13,6 +13,7 @@
             <h2>Step 2 - Enter Address & Other Details:</h2>
             <form method="post" action="/shop/checkout/">{% csrf_token %}
                 <input type="hidden" name="itemsJson" id="itemsJson">
+<!--                <input type="hidden" name="amount" id="amount">-->
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="inputname">Name</label>
@@ -75,12 +76,14 @@
                 </li>` //`` used for formatting
             $('#items').append(mystr); // .append shortcut in jquery for innerhtml
         }
-
         $('#itemsJson').val(JSON.stringify(cart));
-        {% if thank %}
+        {%if thank %}
             alert("Thanks for ordering with us. Your order id is {{id}}. Use it to track your order using our order tracker. Happy Shoping!")
             localStorage.clear();
             document.location = "/shop";
-        {%endif%}
+        {% endif%}
+        // $('#amount').val($('#totalPrice').html())
+
+
     </script>
 {% endblock %}

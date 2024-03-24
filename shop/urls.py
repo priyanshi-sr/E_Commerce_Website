@@ -11,6 +11,7 @@ urlpatterns = [
     path("blog/", views.blog, name="Blog"),
     path("products/<int:myid>", views.productView, name="ProductView"),
     path("checkout/", views.checkout, name="Checkout"),
+    path("handlerequest/", views.handelerequest, name="HandleRequest"),
 ]
 
 

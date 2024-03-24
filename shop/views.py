@@ -5,9 +5,11 @@ from django.shortcuts import render
 from .models import Product, Orders, OrderUpdate
 from .models import Contact
 import json
-
+from django.views.decorators.csrf import csrf_exempt
+from Paytm import Checksum
 # Create your views here.
 from django.http import HttpResponse
+MERCHANT_KEY = 'kbzk1DSbJiV_O3p5'
 
 
 def index(request):
@@ -81,6 +83,7 @@ def checkout(request):
     if request.method == "POST":
         items_json = request.POST.get('itemsJson', '')
         name = request.POST.get('name', '')
+        amount = request.POST.get('amount', '')
         email = request.POST.get('email', '')
         address = request.POST.get('address1', '') + " " + request.POST.get('address2', '')
         city = request.POST.get('city', '')
@@ -94,8 +97,44 @@ def checkout(request):
         update.save()
         thank = True
         id = order.order_id
-        return render(request, 'shop/checkout.html', {'thank': thank, 'id': id})
+        # return render(request, 'shop/checkout.html', {'thank': thank, 'id': id})
+        # request paytm to transfer the amount to your account after payment by user
+        param_dict = {
+
+            'MID': 'WorldP64425807474247',
+            'ORDER_ID': str(order.order_id),
+            'TXN_AMOUNT': str(amount),
+            'CUST_ID': 'email',
+            'INDUSTRY_TYPE_ID': 'Retail',
+            'WEBSITE': 'WEBSTAGING',
+            'CHANNEL_ID': 'WEB',
+            # callback url It is the URL where you want Paytm to show you the payment status.
+            'CALLBACK_URL': 'http://127.0.0.1:8000/shop/handlerequest/',
+
+        }
+        param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict,MERCHANT_KEY)
+        return render(request, 'shop/paytm.html', {'param_dict': param_dict})
     return render(request, 'shop/checkout.html')
+
+
+@csrf_exempt
+def handelerequest(request):
+    return HttpResponse('done')
+    pass
+    # form = request.POST
+    # response_dict = {}
+    # for i in form.keys():
+    #     response_dict[i] = form[i]
+    #     if i == 'CHECKSUMHASH':
+    #         checksum = form[i]
+    #
+    # verify = Checksum.verify_checksum(response_dict, MERCHANT_KEY, checksum)
+    # if verify:
+    #     if response_dict['RESPCODE'] == '01':
+    #         print('order successful')
+    #     else:
+    #         print('order was not successful because' + response_dict['RESPMSG'])
+    # return render(request, 'shop/paymentstatus.html', {'response': response_dict})
 
 
 def blog(request):
