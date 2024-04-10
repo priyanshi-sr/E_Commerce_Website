@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from Paytm import Checksum
 # Create your views here.
 from django.http import HttpResponse
+
 MERCHANT_KEY = 'kbzk1DSbJiV_O3p5'
 
 
@@ -88,23 +89,20 @@ def search(request):
 
 
 def searchMatch(query, item):
-    # Ensure query is not empty or None
-    if not query:
-        return False
+    if query is not None:
+        query = query.lower()  # Convert query to lowercase for case-insensitive comparison
+        if (item.desc and query in item.desc.lower()) \
+                or (item.product_name and query in item.product_name.lower()) \
+                or (item.category and query in item.category.lower()):
+            return True
+        # Check for partial matches
+        if (item.desc and query in item.desc.lower()) \
+                or (item.product_name and query in item.product_name.lower()) \
+                or (item.category and query in item.category.lower()):
+            return True
+    return False
 
-    # Ensure item is not None
-    if item is None:
-        return False
 
-    # Ensure item attributes are not None
-    if item.desc is None or item.product_name is None or item.category is None:
-        return False
-
-    # Perform search operation
-    if query in item.desc.lower() or query in item.product_name.lower() or query in item.category.lower():
-        return True
-    else:
-        return False
 
 
 def productView(request, myid):
@@ -147,7 +145,7 @@ def checkout(request):
             'CALLBACK_URL': 'http://127.0.0.1:8000/shop/handlerequest/',
 
         }
-        param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict,MERCHANT_KEY)
+        param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict, MERCHANT_KEY)
         return render(request, 'shop/paytm.html', {'param_dict': param_dict})
     return render(request, 'shop/checkout.html')
 
